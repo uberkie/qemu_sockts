@@ -1,0 +1,10 @@
+#libvirt-python
+flask
+flask_cors
+uwsgi
+typer
+
+python-crontab
+setuptools
+flask_socketio
+flask_SQLalchemy

@@ -1,0 +1,19 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+
+[Service]
+User=support
+Group=www-data
+WorkingDirectory=/home/support/qemu_web/web/myproject
+Environment="PATH=/home/support/qemu_web/env/bin"
+ExecStart=/home/support/qemu_web/env/bin/uwsgi --async 2 --socket myproject.sock --chmod-socket=666 --master  --wsgi-file wsgi.py --callable app --enable-threads --stats 127.0.0.1:1717 --stats-http
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+ sudo nano /etc/systemd/system/myproject.service

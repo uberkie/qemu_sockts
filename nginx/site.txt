@@ -1,0 +1,74 @@
+server {
+    listen 80;
+    server_name 192.168.111.142;
+
+    location / {
+        include proxy_params;
+        try_files $uri /index.html;
+        root /home/support/qemu_web/web/myproject/ui;
+        index index.html;
+        uwsgi_pass 127.0.0.1:1717;
+        include /home/support/qemu_web/web/myproject/uwsgi_params;
+    }
+
+    location /static {
+        alias /home/support/qemu_web/web/myproject/ui/static;
+    }
+}
+
+# WebSocket and API Server Block (Separate Port)
+server {
+    listen 8081 ssl;
+    server_name 192.168.111.142;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+
+    location /ws {
+        proxy_pass http://localhost:8082;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# HTTPS Server Block
+server {
+    listen 443 ssl;
+    server_name 192.168.111.142;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+
+    location / {
+        include proxy_params;
+        try_files $uri /index.html;
+        root /home/support/qemu_web/web/myproject/ui;
+        index index.html;
+        uwsgi_pass 127.0.0.1:1717;
+        include /home/support/qemu_web/web/myproject/uwsgi_params;
+    }
+
+    location /static {
+        alias /home/support/qemu_web/web/myproject/ui/static;
+    }
+
+    location /ws {
+        proxy_pass http://localhost:8082;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
